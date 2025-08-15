@@ -8,122 +8,46 @@ namespace Inventory_Project
 {
     public class Inventory
     {
-        private List<Product> products = new List<Product>();
+        private List<Product> _products = new List<Product>();
 
-        public void AddProduct()
+        public void AddProduct(Product product)
         {
-            Console.Write("Enter product name: ");
-            string name = Console.ReadLine();
-
-            Console.Write("Enter product price: ");
-            decimal price = decimal.Parse(Console.ReadLine());
-
-            Console.Write("Enter product quantity: ");
-            int quantity = int.Parse(Console.ReadLine());
-
-            var newProduct = new Product(name, price, quantity);
-
-            var existing = products.FirstOrDefault(p => p.Name.Equals(newProduct.Name, StringComparison.OrdinalIgnoreCase));
+            var existing = GetProductByName(product.Name);
             if (existing != null)
             {
-                existing.Quantity += newProduct.Quantity;
-                Console.WriteLine($"Updated quantity of existing product '{existing.Name}' to {existing.Quantity}");
+                existing.Quantity += product.Quantity;
             }
             else
             {
-                products.Add(newProduct);
-                Console.WriteLine($"Added product '{newProduct.Name}' with ID {newProduct.Id}");
+                _products.Add(product);
             }
         }
 
-        public void ViewAllProducts()
+        public List<Product> GetAllProducts() => _products;
+
+        public Product GetProductByName(string name)
         {
-            if (products.Count == 0)
-            {
-                Console.WriteLine("Inventory is empty.");
-                return;
-            }
-
-            Console.WriteLine("\n--- All Products ---");
-
-            foreach (var product in products)
-            {
-                Console.WriteLine($"ID: {product.Id}");
-                Console.WriteLine($"Name: {product.Name}");
-                Console.WriteLine($"Price: {product.Price:C}");
-                Console.WriteLine($"Quantity: {product.Quantity}");
-                Console.WriteLine("---------------------------");
-            }
+            return _products.FirstOrDefault(p =>
+                p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
-        public void EditProduct()
+
+        public bool DeleteProduct(string name)
         {
-            Console.Write("Enter product name to edit: ");
-            string nameToEdit = Console.ReadLine()?.Trim();
-
-            var product = products.FirstOrDefault(p => p.Name.Equals(nameToEdit, StringComparison.OrdinalIgnoreCase));
-            if (product == null)
-            {
-                Console.WriteLine("Product not found.");
-                return;
-            }
-
-            Console.Write("Enter new name (leave empty to keep current): ");
-            string newName = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(newName))
-                product.Name = newName;
-
-            Console.Write("Enter new price (leave empty to keep current): ");
-            string priceInput = Console.ReadLine();
-            if (decimal.TryParse(priceInput, out decimal newPrice))
-                product.Price = newPrice;
-
-            Console.Write("Enter new quantity (leave empty to keep current): ");
-            string qtyInput = Console.ReadLine();
-            if (int.TryParse(qtyInput, out int newQty))
-                product.Quantity = newQty;
-
-            Console.WriteLine("Product updated successfully.");
-        }
-        public void DeleteProduct()
-        {
-            Console.Write("Enter the name of the product to delete: ");
-            string nameToDelete = Console.ReadLine();
-
-            Product productToDelete = products.FirstOrDefault(p => p.Name.Equals(nameToDelete, StringComparison.OrdinalIgnoreCase));
-
-            if (productToDelete != null)
-            {
-                products.Remove(productToDelete);
-                Console.WriteLine($"Product '{nameToDelete}' deleted successfully.");
-            }
-            else
-            {
-                Console.WriteLine("Product not found.");
-            }
-        }
-        public void FindProduct()
-        {
-            Console.Write("Enter product name to search: ");
-            string name = Console.ReadLine();
-
-            var product = products.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
+            var product = GetProductByName(name);
             if (product != null)
             {
-                Console.WriteLine("\n--- Product Details ---");
-                Console.WriteLine($"Name: {product.Name}");
-                Console.WriteLine($"Price: {product.Price:C}");
-                Console.WriteLine($"Quantity: {product.Quantity}");
+                _products.Remove(product);
+                return true;
             }
-            else
-            {
-                Console.WriteLine("Product not found.");
-            }
+            return false;
         }
 
-
-
-
-
+        public void UpdateProduct(Product product, string? newName, decimal? newPrice, int? newQuantity)
+        {
+            if (!string.IsNullOrWhiteSpace(newName)) product.Name = newName;
+            if (newPrice.HasValue) product.Price = newPrice.Value;
+            if (newQuantity.HasValue) product.Quantity = newQuantity.Value;
+        }
     }
 }
+
